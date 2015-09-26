@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import logging
+import re
 from argparse import ArgumentParser
 
 from slackclient import SlackClient
@@ -24,6 +25,26 @@ class RtmBot(object):
         self.token = token
         self.bot_plugins = []
         self.slack_client = None
+        self.user_map = {}
+        self.channel_map = {}
+ 
+    def get_channel_map(self):
+        group_data = json.loads(self.slack_client.api_call("groups.list"))
+
+        for group in group_data['groups']:
+            self.channel_map[group['id']] = {
+                "channel_name": group.get('name')
+            }
+        
+    def get_user_map(self):
+        user_data = json.loads(self.slack_client.api_call("users.list"))
+
+        for member in user_data['members']:
+            self.user_map[member['id']] = {
+                "user_email": member['profile'].get('email'), 
+                "user_name": member.get('name')
+            }
+
     def connect(self):
         """Convenience method that creates Server instance"""
         self.slack_client = SlackClient(self.token)
@@ -31,6 +52,8 @@ class RtmBot(object):
     def start(self):
         self.connect()
         self.load_plugins()
+        self.get_user_map()
+        self.get_channel_map()
         while True:
             for reply in self.slack_client.rtm_read():
                 self.input(reply)
@@ -45,6 +68,13 @@ class RtmBot(object):
             self.slack_client.server.ping()
             self.last_ping = now
     def input(self, data):
+
+        if 'user' in data and data['user'] in self.user_map:
+            data.update( self.user_map[data['user']] )
+
+        if 'channel' in data and data['channel'] in self.channel_map:
+            data.update( self.channel_map[data['channel']] )
+
         if "type" in data:
             function_name = "process_" + data["type"]
             dbg("got {}".format(function_name))
