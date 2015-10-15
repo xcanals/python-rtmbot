@@ -112,7 +112,7 @@ class RtmBot(object):
         for plugin in glob.glob(directory+'/plugins/*'):
             sys.path.insert(0, plugin)
             sys.path.insert(0, directory+'/plugins/')
-        for plugin in glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py'):
+        for plugin in sorted( glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py') ):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
 #            try:
