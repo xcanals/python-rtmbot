@@ -69,11 +69,19 @@ class RtmBot(object):
             self.last_ping = now
     def input(self, data):
 
-        if 'user' in data and data['user'] in self.user_map:
-            data.update( self.user_map[data['user']] )
+        if 'user' in data: 
+            if isinstance(data['user'], basestring) and data['user'] in self.user_map:
+                data.update( self.user_map[data['user']] )
+            else:
+                print "WARN: got a weird user - ", data['user']
+                print data
 
-        if 'channel' in data and data['channel'] in self.channel_map:
-            data.update( self.channel_map[data['channel']] )
+        if 'channel' in data:
+            if isinstance(data['channel'], basestring) and data['channel'] in self.channel_map:
+                data.update( self.channel_map[data['channel']] )
+            else:
+                print "WARN: got a weird channel - ", data['channel']
+                print data
 
         if "type" in data:
             function_name = "process_" + data["type"]
