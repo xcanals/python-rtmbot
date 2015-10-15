@@ -86,9 +86,13 @@ class RtmBot(object):
         if "type" in data:
             function_name = "process_" + data["type"]
             dbg("got {}".format(function_name))
+            data['handled'] = False
+
             for plugin in self.bot_plugins:
                 plugin.register_jobs()
-                plugin.do(function_name, data)
+                result = plugin.do(function_name, data)
+                if result: data['handled'] = True
+
     def output(self):
         for plugin in self.bot_plugins:
             limiter = False
@@ -137,11 +141,13 @@ class Plugin(object):
         else:
             self.module.crontable = []
     def do(self, function_name, data):
+        result = False
+
         if function_name in dir(self.module):
             #this makes the plugin fail with stack trace in debug mode
             if not debug:
                 try:
-                    eval("self.module."+function_name)(data)
+                    result = eval("self.module."+function_name)(data)
                 except:
                     dbg("problem in module {} {}".format(function_name, data))
             else:
@@ -151,6 +157,8 @@ class Plugin(object):
                 self.module.catch_all(data)
             except:
                 dbg("problem in catch all")
+  
+        return result
     def do_jobs(self):
         for job in self.jobs:
             job.check()
