@@ -102,8 +102,7 @@ class RtmBot(object):
                     if limiter == True:
                         time.sleep(.1)
                         limiter = False
-                    message = output[1].encode('ascii','ignore')
-                    channel.send_message("{}".format(message))
+                    channel.send_message("{}".format(output[1]))
                     limiter = True
     def crons(self):
         for plugin in self.bot_plugins:
@@ -113,6 +112,7 @@ class RtmBot(object):
             sys.path.insert(0, plugin)
             sys.path.insert(0, directory+'/plugins/')
         for plugin in sorted( glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py') ):
+            print plugin
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
 #            try:
