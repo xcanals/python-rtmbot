@@ -29,7 +29,7 @@ class RtmBot(object):
         self.channel_map = {}
  
     def get_channel_map(self):
-        group_data = json.loads(self.slack_client.api_call("groups.list"))
+        group_data = self.slack_client.api_call("groups.list")
 
         for group in group_data['groups']:
             self.channel_map[group['id']] = {
@@ -37,7 +37,7 @@ class RtmBot(object):
             }
         
     def get_user_map(self):
-        user_data = json.loads(self.slack_client.api_call("users.list"))
+        user_data = self.slack_client.api_call("users.list")
 
         for member in user_data['members']:
             self.user_map[member['id']] = {
